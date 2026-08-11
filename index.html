@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Carter's Homepage</title>
+    <title>6+7</title>
 
     <style>
         * {
@@ -14,66 +14,329 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                "Microsoft YaHei",
+                sans-serif;
+
+            /*
+             * 后面上传自己的背景图后，
+             * 将图片命名为 bg.jpg，
+             * 放进 images 文件夹即可。
+             */
+            background:
+                linear-gradient(
+                    rgba(0, 0, 0, 0.35),
+                    rgba(0, 0, 0, 0.45)
+                ),
+                url("./images/bg.jpg");
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            /* 如果暂时没有背景图，会显示这个底色 */
+            background-color: #20242a;
+
+            color: white;
+
             display: flex;
             justify-content: center;
             align-items: center;
 
-            background: #1e1e1e;
-            color: white;
-
-            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
 
         .container {
+            width: 90%;
+            max-width: 900px;
             text-align: center;
+
+            animation: fadeIn 1.2s ease;
         }
 
-        h1 {
-            font-size: 64px;
-            margin-bottom: 20px;
+        /* ---------- 名字 ---------- */
+
+        .name {
+            font-size: clamp(64px, 11vw, 130px);
+            font-weight: 300;
+
+            letter-spacing: 8px;
+
+            margin-bottom: 22px;
+
+            text-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.35);
         }
 
-        p {
-            font-size: 22px;
-            margin-bottom: 30px;
-            opacity: 0.8;
+        /* ---------- 座右铭 ---------- */
+
+        .motto {
+            font-family:
+                "STKaiti",
+                "KaiTi",
+                "楷体",
+                serif;
+
+            font-size: clamp(20px, 3vw, 30px);
+
+            letter-spacing: 5px;
+
+            margin-bottom: 55px;
+
+            text-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.4);
         }
 
-        a {
-            display: inline-block;
-            padding: 12px 24px;
+        /* ---------- 按钮区域 ---------- */
+
+        .links {
+            display: flex;
+
+            justify-content: center;
+            align-items: flex-start;
+
+            flex-wrap: wrap;
+
+            gap: 30px;
+        }
+
+        .link-item {
+            width: 82px;
 
             color: white;
             text-decoration: none;
 
-            border: 1px solid white;
-            border-radius: 8px;
-
-            transition: 0.3s;
+            transition:
+                transform 0.25s ease,
+                opacity 0.25s ease;
         }
 
-        a:hover {
-            background: white;
-            color: black;
+        .link-item:hover {
+            transform: translateY(-8px);
         }
+
+        /* ---------- 圆形图标 ---------- */
+
+        .icon {
+            width: 68px;
+            height: 68px;
+
+            margin: 0 auto 10px;
+
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 28px;
+
+            background: rgba(0, 0, 0, 0.16);
+
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+
+            transition:
+                background 0.25s ease,
+                color 0.25s ease,
+                transform 0.25s ease;
+        }
+
+        .link-item:hover .icon {
+            background: rgba(255, 255, 255, 0.92);
+            color: #222;
+        }
+
+        .label {
+            font-size: 14px;
+            letter-spacing: 1px;
+
+            text-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ---------- 动画 ---------- */
+
+        @keyframes fadeIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ---------- 手机适配 ---------- */
+
+        @media (max-width: 600px) {
+
+            .name {
+                letter-spacing: 4px;
+            }
+
+            .motto {
+                margin-bottom: 40px;
+                letter-spacing: 3px;
+            }
+
+            .links {
+                gap: 20px;
+            }
+
+            .link-item {
+                width: 65px;
+            }
+
+            .icon {
+                width: 58px;
+                height: 58px;
+
+                font-size: 24px;
+            }
+
+            .label {
+                font-size: 12px;
+            }
+        }
+
     </style>
 </head>
 
+
 <body>
 
-<div class="container">
+    <main class="container">
 
-    <h1>Carter</h1>
+        <!-- ===== 首页名字 ===== -->
 
-    <p>My personal homepage is under construction.</p>
+        <h1 class="name">6+7</h1>
 
-    <a href="https://github.com/carter6713">
-        GitHub
-    </a>
 
-</div>
+        <!-- ===== 座右铭 ===== -->
+
+        <p class="motto">
+            但行好事，莫问前程
+        </p>
+
+
+        <!-- ===== 导航按钮 ===== -->
+
+        <div class="links">
+
+
+            <!-- GitHub -->
+
+            <a
+                class="link-item"
+                href="https://github.com/carter6713"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <div class="icon">
+                    ◇
+                </div>
+
+                <div class="label">
+                    GitHub
+                </div>
+
+            </a>
+
+
+            <!-- 博客园 -->
+
+            <a
+                class="link-item"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <div class="icon">
+                    ✎
+                </div>
+
+                <div class="label">
+                    Blog
+                </div>
+
+            </a>
+
+
+            <!-- 个人博客 -->
+
+            <a
+                class="link-item"
+                href="./blog/"
+            >
+
+                <div class="icon">
+                    ☰
+                </div>
+
+                <div class="label">
+                    博客
+                </div>
+
+            </a>
+
+
+            <!-- Email -->
+
+            <a
+                class="link-item"
+                href="mailto:carter6713@163.com"
+            >
+
+                <div class="icon">
+                    @
+                </div>
+
+                <div class="label">
+                    Email
+                </div>
+
+            </a>
+
+
+            <!-- CV -->
+
+            <a
+                class="link-item"
+                href="./cv.pdf"
+                target="_blank"
+            >
+
+                <div class="icon">
+                    ⌘
+                </div>
+
+                <div class="label">
+                    CV
+                </div>
+
+            </a>
+
+
+        </div>
+
+    </main>
 
 </body>
 
