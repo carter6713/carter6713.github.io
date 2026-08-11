@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>我的个人主页搭建记录</title>
+    <link href="/blog/2026/08/11/%E6%88%91%E7%9A%84%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E8%AE%B0%E5%BD%95/"/>
+    <url>/blog/2026/08/11/%E6%88%91%E7%9A%84%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E8%AE%B0%E5%BD%95/</url>
+    
+    <content type="html"><![CDATA[<p>终于开始搭建自己的个人主页和博客了。</p><span id="more"></span><h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>一直想拥有一个属于自己的个人主页，于是开始使用 GitHub Pages 搭建。</p><p>目前主页地址：</p><p><a href="https://carter6713.github.io/">https://carter6713.github.io/</a></p><h2 id="使用的技术"><a href="#使用的技术" class="headerlink" title="使用的技术"></a>使用的技术</h2><p>这次主要使用了：</p><ul><li>GitHub Pages</li><li>Hexo</li><li>Fluid</li><li>Markdown</li></ul><h2 id="博客结构"><a href="#博客结构" class="headerlink" title="博客结构"></a>博客结构</h2><p>我的个人主页位于：</p><pre><code class="language-text">carter6713.github.io/</code></pre>]]></content>
+    
+    
+    <categories>
+      
+      <category>技术</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Hexo</tag>
+      
+      <tag>Fluid</tag>
+      
+      <tag>GitHub Pages</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>
