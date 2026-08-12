@@ -396,10 +396,64 @@ body {
 }
 </style>
 
+<script type="text/javascript" src="memories.js"></script>
 <script type="text/javascript" src="js/ge1doot.js"></script>
 <script type="text/javascript">
 
 "use strict";
+
+var memoryPositions = [
+	// north
+	{x:-1000, y:0, z:1500, nx:0, nz:1},
+	{x:0,     y:0, z:1500, nx:0, nz:1},
+	{x:1000,  y:0, z:1500, nx:0, nz:1},
+	// east
+	{x:1500,  y:0, z:1000, nx:-1, nz:0},
+	{x:1500,  y:0, z:0, nx:-1, nz:0},
+	{x:1500,  y:0, z:-1000, nx:-1, nz:0},
+	// south
+	{x:1000,  y:0, z:-1500, nx:0, nz:-1},
+	{x:0,     y:0, z:-1500, nx:0, nz:-1},
+	{x:-1000, y:0, z:-1500, nx:0, nz:-1},
+	// west
+	{x:-1500, y:0, z:-1000, nx:1, nz:0},
+	{x:-1500, y:0, z:0, nx:1, nz:0},
+	{x:-1500, y:0, z:1000, nx:1, nz:0}
+];
+
+var memoryImageData = (function () {
+	var memories = window.MEMORIES;
+	var imageData = [];
+	var count;
+
+	if (!Array.isArray(memories)) {
+		console.error("MEMORIES 数据不存在或格式错误：应为数组。");
+		return imageData;
+	}
+	if (memories.length > memoryPositions.length) {
+		console.warn("当前 3D 展厅只有 12 个展示位置，多余内容尚未展示。");
+	}
+
+	count = Math.min(memories.length, memoryPositions.length);
+	for (var i = 0; i < count; i++) {
+		var memory = memories[i];
+		var position = memoryPositions[i];
+		if (!memory || typeof memory !== "object" || typeof memory.image !== "string" || !memory.image) {
+			console.error("MEMORIES[" + i + "] 格式错误：缺少有效的 image。");
+			continue;
+		}
+		imageData.push({
+			img: memory.image,
+			x: position.x,
+			y: position.y,
+			z: position.z,
+			nx: position.nx,
+			nz: position.nz,
+			memory: memory
+		});
+	}
+	return imageData;
+})();
 
 (function () {
 	/* ==== definitions ==== */
@@ -561,10 +615,11 @@ body {
 		this.visible  = false;
 		this.normalX  = img.nx;
 		this.normalZ  = img.nz;
-		this.title    = img.title || "";
-		this.date     = img.date || "";
-		this.location = img.location || "";
-		this.text     = img.text || "";
+		this.memory   = img.memory || {};
+		this.title    = this.memory.title || "";
+		this.date     = this.memory.date || "";
+		this.location = this.memory.location || "";
+		this.text     = this.memory.text || "";
 		this.index    = index;
 		// ---- point center ----
 		this.pc = new ge1doot.transform3D.Point(img.x, img.y, img.z);
@@ -862,36 +917,7 @@ body {
 		}
 	}
 })().load({
-	imgdata:[
-		// north
-		{img:'images/1.jpg', x:-1000, y:0, z:1500, nx:0, nz:1,
-			title:'记忆 01', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/2.jpg', x:0,     y:0, z:1500, nx:0, nz:1,
-			title:'记忆 02', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/3.jpg', x:1000,  y:0, z:1500, nx:0, nz:1,
-			title:'记忆 03', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		// east
-		{img:'images/4.jpg', x:1500,  y:0, z:1000, nx:-1, nz:0,
-			title:'记忆 04', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/5.jpg', x:1500,  y:0, z:0, nx:-1, nz:0,
-			title:'记忆 05', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/6.jpg', x:1500,  y:0, z:-1000, nx:-1, nz:0,
-			title:'记忆 06', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		// south
-		{img:'images/7.jpg', x:1000,  y:0, z:-1500, nx:0, nz:-1,
-			title:'记忆 07', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/8.jpg', x:0,     y:0, z:-1500, nx:0, nz:-1,
-			title:'记忆 08', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/9.jpg', x:-1000, y:0, z:-1500, nx:0, nz:-1,
-			title:'记忆 09', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		// west
-		{img:'images/10.jpg', x:-1500, y:0, z:-1000, nx:1, nz:0,
-			title:'记忆 10', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/11.jpg', x:-1500, y:0, z:0, nx:1, nz:0,
-			title:'记忆 11', date:'', location:'', text:'在这里写下这一刻的故事。'},
-		{img:'images/12.jpg', x:-1500, y:0, z:1000, nx:1, nz:0,
-			title:'记忆 12', date:'', location:'', text:'在这里写下这一刻的故事。'}
-	],
+	imgdata: memoryImageData,
 	structure:[
 		{
 			// wall
