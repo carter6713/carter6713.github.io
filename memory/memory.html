@@ -24,6 +24,78 @@ body {
 	background:#fff;
 }
 
+/* ---------- 页面标题 ---------- */
+
+.memory-heading {
+	position: fixed;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 9998;
+
+	color: #3f3f3f;
+	text-align: center;
+	font-family:
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		"Microsoft YaHei",
+		sans-serif;
+
+	pointer-events: none;
+	transition:
+		opacity 0.3s ease,
+		visibility 0s linear 0s;
+}
+
+.memory-heading--hidden {
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity 0.3s ease,
+		visibility 0s linear 0.3s;
+}
+
+.memory-heading__title {
+	min-height: 32px;
+	font-size: 26px;
+	font-weight: 300;
+	letter-spacing: 9px;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.memory-heading__subtitle {
+	min-height: 17px;
+	margin-top: 7px;
+	color: rgba(60, 80, 95, 0.55);
+	font-size: 12px;
+	font-weight: 300;
+	letter-spacing: 2.5px;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+.memory-heading__cursor {
+	display: inline-block;
+	margin-left: 2px;
+	color: #537491;
+	font-weight: 200;
+	letter-spacing: 0;
+	animation: memory-cursor-blink 0.85s steps(1, end) infinite;
+	transition: opacity 0.45s ease;
+}
+
+.memory-heading__cursor--hidden {
+	animation: none;
+	opacity: 0;
+}
+
+@keyframes memory-cursor-blink {
+	0%, 48% { opacity: 1; }
+	49%, 100% { opacity: 0; }
+}
+
 /* ---------- 返回主页 ---------- */
 
 .back-home {
@@ -72,6 +144,12 @@ body {
 	/* ==== definitions ==== */
 	var diapo = [], layers = [], ctx, pointer, scr, camera, light, fps = 0, quality = [1,2],
 		baseFocalLength = 0, zoom = 1, targetZoom = 1,
+	setMemoryHeadingVisible = function (visible) {
+		var heading = document.getElementById("memoryHeading");
+		if (!heading) return;
+		if (visible) heading.classList.remove("memory-heading--hidden");
+		else heading.classList.add("memory-heading--hidden");
+	},
 	// ---- poly constructor ----
 	Poly = function (parent, face) {
 		this.parent = parent;
@@ -137,11 +215,13 @@ body {
 						camera.target.x = 0;
 						camera.target.z = 0;
 						camera.target.elem = false;
+						setMemoryHeadingVisible(true);
 					} else {
 						// ---- goto diapo ----
 						camera.target.elem = camera.over;
 						camera.target.x = camera.over.tx;
 						camera.target.z = camera.over.tz;
+						setMemoryHeadingVisible(false);
 						// ---- adapt tesselation level to distance ----
 						for (var i = 0, d; d = diapo[i++];) {
 							var dx = camera.target.x - d.pc.x;
@@ -169,6 +249,7 @@ body {
 				this.focalLength = baseFocalLength * zoom;
 				// ---- rotation ----
 				if (pointer.isDraging) {
+					if (this.target.elem) setMemoryHeadingVisible(true);
 					this.target.elem = false;
 					this.target.ry = -pointer.Xi * 0.01;
 					this.target.rx = (pointer.Y - scr.height * 0.5) / (scr.height * 0.5);
@@ -436,13 +517,13 @@ body {
 		{img:true},
 		{
 			// ceilingLight
-			fill: {r:255, g:128, b:0},
+			fill: {r:83, g:116, b:145},
 			x: [-50,50,50,-50],
 			z: [450,450,550,550],
 			y: [500,500,500,500]
 		},{
 			// groundLight
-			fill: {r:255, g:128, b:0},
+			fill: {r:83, g:116, b:145},
 			x: [-50,50,50,-50],
 			z: [450,450,550,550],
 			y: [-500,-500,-500,-500]
@@ -457,6 +538,15 @@ body {
 </head>
 <body>
 
+<div id="memoryHeading" class="memory-heading" aria-hidden="true">
+	<div class="memory-heading__title">
+		<span id="memoryTitle"></span><span id="memoryCursor" class="memory-heading__cursor">|</span>
+	</div>
+	<div class="memory-heading__subtitle">
+		<span id="memorySubtitle"></span>
+	</div>
+</div>
+
 <a class="back-home" href="../">
 	← 返回主页
 </a>
@@ -464,6 +554,48 @@ body {
 <canvas id="canvas">
 	你的浏览器不支持HTML5画布技术，请使用现代浏览器。
 </canvas>
+
+<script type="text/javascript">
+(function () {
+	"use strict";
+
+	var titleText = "记 忆";
+	var subtitleText = "一些值得留下的瞬间";
+
+	function typeText(element, text, delay, done) {
+		var index = 0;
+
+		function typeNextCharacter() {
+			if (index < text.length) {
+				element.textContent += text.charAt(index++);
+				window.setTimeout(typeNextCharacter, delay);
+			} else if (done) {
+				done();
+			}
+		}
+
+		typeNextCharacter();
+	}
+
+	window.addEventListener("load", function () {
+		var title = document.getElementById("memoryTitle");
+		var subtitle = document.getElementById("memorySubtitle");
+		var cursor = document.getElementById("memoryCursor");
+		var subtitleLine = subtitle.parentNode;
+
+		typeText(title, titleText, 180, function () {
+			window.setTimeout(function () {
+				subtitleLine.appendChild(cursor);
+				typeText(subtitle, subtitleText, 95, function () {
+					window.setTimeout(function () {
+						cursor.className += " memory-heading__cursor--hidden";
+					}, 1600);
+				});
+			}, 650);
+		});
+	}, false);
+})();
+</script>
 
 
 </body>
