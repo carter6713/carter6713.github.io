@@ -96,6 +96,267 @@ body {
 	49%, 100% { opacity: 0; }
 }
 
+/* ---------- 照片说明 ---------- */
+
+.memory-caption {
+	position: fixed;
+	left: 50%;
+	bottom: 28px;
+	z-index: 9997;
+
+	box-sizing: border-box;
+	width: calc(100vw - 40px);
+	max-width: 520px;
+	padding: 17px 24px 19px;
+
+	color: #555;
+	text-align: center;
+	font-family:
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		"Microsoft YaHei",
+		sans-serif;
+
+	background: rgba(255, 255, 255, 0.72);
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+	border: 1px solid rgba(50, 70, 90, 0.10);
+	border-radius: 12px;
+	box-shadow: 0 12px 35px rgba(30, 50, 70, 0.08);
+
+	opacity: 0;
+	visibility: hidden;
+	filter: blur(4px);
+	transform: translate(-50%, 14px) scale(0.985);
+	pointer-events: none;
+
+	transition:
+		opacity 0.3s ease,
+		transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+		filter 0.3s ease,
+		visibility 0s linear 0.35s;
+}
+
+.memory-caption--visible {
+	opacity: 1;
+	visibility: visible;
+	filter: blur(0);
+	transform: translate(-50%, 0) scale(1);
+	transition:
+		opacity 0.45s ease,
+		transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+		filter 0.45s ease,
+		visibility 0s linear 0s;
+}
+
+.memory-caption__accent {
+	width: 28px;
+	height: 1px;
+	margin: 0 auto 10px;
+	background: #537491;
+	opacity: 0.55;
+}
+
+.memory-caption__item {
+	opacity: 0;
+	transform: translateY(5px);
+	transition:
+		opacity 0.28s ease,
+		transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.memory-caption--visible .memory-caption__meta {
+	opacity: 1;
+	transform: translateY(0);
+	transition-delay: 0.08s;
+}
+
+.memory-caption--visible .memory-caption__title {
+	opacity: 1;
+	transform: translateY(0);
+	transition-delay: 0.16s;
+}
+
+.memory-caption--visible .memory-caption__text {
+	opacity: 1;
+	transform: translateY(0);
+	transition-delay: 0.24s;
+}
+
+.memory-caption__meta {
+	color: rgba(83, 116, 145, 0.72);
+	font-size: 11px;
+	font-weight: 300;
+	letter-spacing: 1.8px;
+	line-height: 1.5;
+}
+
+.memory-caption__separator {
+	display: inline-block;
+	width: 2px;
+	height: 2px;
+	margin: 0 8px;
+	vertical-align: middle;
+	background: #537491;
+	border-radius: 50%;
+	opacity: 0.62;
+}
+
+.memory-caption__title {
+	margin-top: 8px;
+	color: #444;
+	font-size: 20px;
+	font-weight: 300;
+	letter-spacing: 4px;
+	line-height: 1.4;
+}
+
+.memory-caption__text {
+	margin-top: 7px;
+	color: rgba(68, 68, 68, 0.76);
+	font-size: 13px;
+	font-weight: 300;
+	letter-spacing: 1px;
+	line-height: 1.8;
+}
+
+/* ---------- 聚焦照片导航 ---------- */
+
+.memory-navigation {
+	position: fixed;
+	inset: 0;
+	z-index: 9998;
+
+	visibility: hidden;
+	pointer-events: none;
+	transition: visibility 0s linear 0.35s;
+}
+
+.memory-navigation--visible {
+	visibility: visible;
+	transition-delay: 0s;
+}
+
+.memory-navigation__button {
+	position: fixed;
+	top: 50%;
+	box-sizing: border-box;
+	width: 64px;
+	height: 72px;
+	padding: 0;
+
+	color: rgba(255, 255, 255, 0.88);
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+
+	opacity: 0;
+	transform: translateY(-50%) scale(0.96);
+	visibility: hidden;
+	pointer-events: none;
+	cursor: pointer;
+
+	transition:
+		opacity 0.35s ease,
+		transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+		visibility 0s linear 0.35s;
+}
+
+.memory-navigation__button--prev {
+	left: 8vw;
+}
+
+.memory-navigation__button--next {
+	right: 8vw;
+}
+
+.memory-navigation--visible .memory-navigation__button {
+	opacity: 0.78;
+	transform: translateY(-50%) scale(1);
+	visibility: visible;
+	pointer-events: auto;
+	transition-delay: 0s;
+}
+
+.memory-navigation--idle .memory-navigation__button {
+	opacity: 0.26;
+	transform: translateY(-50%) scale(0.96);
+}
+
+.memory-navigation--visible .memory-navigation__button--prev:hover,
+.memory-navigation--visible .memory-navigation__button--prev:focus-visible {
+	opacity: 0.96;
+	transform: translate(-3px, -50%) scale(1.04);
+}
+
+.memory-navigation--visible .memory-navigation__button--next:hover,
+.memory-navigation--visible .memory-navigation__button--next:focus-visible {
+	opacity: 0.96;
+	transform: translate(3px, -50%) scale(1.04);
+}
+
+.memory-navigation__button:focus {
+	outline: none;
+}
+
+.memory-navigation__button:focus-visible {
+	outline: 1px solid rgba(83, 116, 145, 0.72);
+	outline-offset: 4px;
+}
+
+.memory-navigation__icon {
+	display: block;
+	width: 30px;
+	height: 40px;
+	margin: auto;
+	overflow: visible;
+}
+
+.memory-navigation__glass-bar {
+	stroke: rgba(255, 255, 255, 0.48);
+	stroke-width: 0.65;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28));
+	transition:
+		stroke 0.4s ease,
+		filter 0.4s ease;
+}
+
+.memory-navigation__button:hover .memory-navigation__glass-bar,
+.memory-navigation__button:focus-visible .memory-navigation__glass-bar {
+	stroke: rgba(255, 255, 255, 0.72);
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.32));
+}
+
+@media (max-width: 700px) {
+	.memory-caption {
+		bottom: max(18px, env(safe-area-inset-bottom));
+		width: calc(100vw - 32px);
+		padding: 14px 18px 16px;
+	}
+
+	.memory-caption__title {
+		font-size: 18px;
+	}
+
+	.memory-caption__text {
+		font-size: 12px;
+	}
+
+	.memory-navigation__button {
+		width: 52px;
+		height: 60px;
+	}
+
+	.memory-navigation__button--prev {
+		left: 14px;
+	}
+
+	.memory-navigation__button--next {
+		right: 14px;
+	}
+}
+
 /* ---------- 返回主页 ---------- */
 
 .back-home {
@@ -144,11 +405,129 @@ body {
 	/* ==== definitions ==== */
 	var diapo = [], layers = [], ctx, pointer, scr, camera, light, fps = 0, quality = [1,2],
 		baseFocalLength = 0, zoom = 1, targetZoom = 1,
+		captionTimer = null, captionVersion = 0, navigationIdleTimer = null,
 	setMemoryHeadingVisible = function (visible) {
 		var heading = document.getElementById("memoryHeading");
 		if (!heading) return;
 		if (visible) heading.classList.remove("memory-heading--hidden");
 		else heading.classList.add("memory-heading--hidden");
+	},
+	hideMemoryCaption = function () {
+		captionVersion++;
+		if (captionTimer) {
+			window.clearTimeout(captionTimer);
+			captionTimer = null;
+		}
+
+		var caption = document.getElementById("memoryCaption");
+		if (!caption) return;
+		caption.classList.remove("memory-caption--visible");
+		caption.setAttribute("aria-hidden", "true");
+	},
+	showMemoryCaption = function (diapo) {
+		hideMemoryCaption();
+		var requestedVersion = captionVersion;
+
+		captionTimer = window.setTimeout(function () {
+			captionTimer = null;
+			if (requestedVersion !== captionVersion || camera.target.elem !== diapo) return;
+
+			var caption = document.getElementById("memoryCaption");
+			var meta = document.getElementById("memoryCaptionMeta");
+			var date = document.getElementById("memoryDate");
+			var location = document.getElementById("memoryLocation");
+			var separator = document.getElementById("memoryCaptionSeparator");
+			var title = document.getElementById("memoryCaptionTitle");
+			var text = document.getElementById("memoryCaptionText");
+
+			date.textContent = diapo.date;
+			location.textContent = diapo.location;
+			separator.style.display = diapo.date && diapo.location ? "inline-block" : "none";
+			meta.style.display = diapo.date || diapo.location ? "block" : "none";
+			title.textContent = diapo.title;
+			title.style.display = diapo.title ? "block" : "none";
+			text.textContent = diapo.text;
+			text.style.display = diapo.text ? "block" : "none";
+
+			caption.classList.add("memory-caption--visible");
+			caption.setAttribute("aria-hidden", "false");
+		}, 450);
+	},
+	clearGalleryNavigationIdle = function () {
+		if (navigationIdleTimer) {
+			window.clearTimeout(navigationIdleTimer);
+			navigationIdleTimer = null;
+		}
+	},
+	scheduleGalleryNavigationIdle = function () {
+		clearGalleryNavigationIdle();
+		var delay = window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches ? 1500 : 1000;
+
+		navigationIdleTimer = window.setTimeout(function () {
+			navigationIdleTimer = null;
+			var navigation = document.getElementById("memoryNavigation");
+			if (navigation && camera.target.elem) navigation.classList.add("memory-navigation--idle");
+		}, delay);
+	},
+	wakeGalleryNavigation = function (restartIdleTimer) {
+		clearGalleryNavigationIdle();
+		var navigation = document.getElementById("memoryNavigation");
+		if (!navigation || !camera.target.elem) return;
+		navigation.classList.remove("memory-navigation--idle");
+		if (restartIdleTimer !== false) scheduleGalleryNavigationIdle();
+	},
+	showGalleryNavigation = function () {
+		var navigation = document.getElementById("memoryNavigation");
+		if (!navigation) return;
+		navigation.classList.add("memory-navigation--visible");
+		navigation.setAttribute("aria-hidden", "false");
+		wakeGalleryNavigation(true);
+	},
+	hideGalleryNavigation = function () {
+		clearGalleryNavigationIdle();
+		var navigation = document.getElementById("memoryNavigation");
+		if (!navigation) return;
+		navigation.classList.remove("memory-navigation--visible", "memory-navigation--idle");
+		navigation.setAttribute("aria-hidden", "true");
+	},
+	focusMemory = function (targetDiapo) {
+		if (!targetDiapo) return;
+
+		hideMemoryCaption();
+		camera.target.elem = targetDiapo;
+		camera.target.x = targetDiapo.tx;
+		camera.target.z = targetDiapo.tz;
+		setMemoryHeadingVisible(false);
+		showGalleryNavigation();
+		showMemoryCaption(targetDiapo);
+
+		// ---- adapt tesselation level to distance ----
+		for (var i = 0, d; d = diapo[i++];) {
+			var dx = camera.target.x - d.pc.x;
+			var dz = camera.target.z - d.pc.z;
+			var dist = Math.sqrt(dx * dx + dz * dz);
+			var lev = (dist > 1500) ? quality[0] : quality[1];
+			d.img.setLevel(lev);
+		}
+	},
+	focusDiapoByIndex = function (index) {
+		if (!diapo.length) return;
+		index = (index + diapo.length) % diapo.length;
+		focusMemory(diapo[index]);
+	},
+	goToPreviousMemory = function () {
+		if (camera.target.elem) focusDiapoByIndex(camera.target.elem.index - 1);
+	},
+	goToNextMemory = function () {
+		if (camera.target.elem) focusDiapoByIndex(camera.target.elem.index + 1);
+	},
+	returnToGallery = function () {
+		hideMemoryCaption();
+		hideGalleryNavigation();
+		camera.target.x = 0;
+		camera.target.z = 0;
+		camera.target.elem = false;
+		setMemoryHeadingVisible(true);
 	},
 	// ---- poly constructor ----
 	Poly = function (parent, face) {
@@ -169,7 +548,7 @@ body {
 		}
 	},
 	// ---- diapo constructor ----
-	Diapo = function (path, img, structure) {
+	Diapo = function (path, img, structure, index) {
 		// ---- create image ----
 		this.img = new ge1doot.transform3D.Image(
 			this, path + img.img, 1, {
@@ -182,11 +561,16 @@ body {
 		this.visible  = false;
 		this.normalX  = img.nx;
 		this.normalZ  = img.nz;
+		this.title    = img.title || "";
+		this.date     = img.date || "";
+		this.location = img.location || "";
+		this.text     = img.text || "";
+		this.index    = index;
 		// ---- point center ----
 		this.pc = new ge1doot.transform3D.Point(img.x, img.y, img.z);
 		// ---- target positions ----
-		this.tx = img.x + (img.nx * Math.sqrt(camera.focalLength) * 20);
-		this.tz = img.z - (img.nz * Math.sqrt(camera.focalLength) * 20);
+		this.tx = img.x + (img.nx * Math.sqrt(camera.focalLength) * 26);
+		this.tz = img.z - (img.nz * Math.sqrt(camera.focalLength) * 26);
 		// ---- create polygons ----
 		this.poly = [];
 		for (var i = -1, p; p = structure[++i];) {
@@ -212,25 +596,19 @@ body {
 				if (camera.over) {
 					if (camera.over === camera.target.elem) {
 						// ---- return to the center ----
-						camera.target.x = 0;
-						camera.target.z = 0;
-						camera.target.elem = false;
-						setMemoryHeadingVisible(true);
+						returnToGallery();
 					} else {
 						// ---- goto diapo ----
-						camera.target.elem = camera.over;
-						camera.target.x = camera.over.tx;
-						camera.target.z = camera.over.tz;
-						setMemoryHeadingVisible(false);
-						// ---- adapt tesselation level to distance ----
-						for (var i = 0, d; d = diapo[i++];) {
-							var dx = camera.target.x - d.pc.x;
-							var dz = camera.target.z - d.pc.z;
-							var dist = Math.sqrt(dx * dx + dz * dz);
-							var lev = (dist > 1500) ? quality[0] : quality[1];
-							d.img.setLevel(lev);
-						}
+						focusMemory(camera.over);
 					}
+				}
+			},
+			startDrag: function () {
+				if (camera.target.elem) {
+					hideMemoryCaption();
+					hideGalleryNavigation();
+					camera.target.elem = false;
+					setMemoryHeadingVisible(true);
 				}
 			}
 		});
@@ -249,7 +627,11 @@ body {
 				this.focalLength = baseFocalLength * zoom;
 				// ---- rotation ----
 				if (pointer.isDraging) {
-					if (this.target.elem) setMemoryHeadingVisible(true);
+					if (this.target.elem) {
+						hideMemoryCaption();
+						hideGalleryNavigation();
+						setMemoryHeadingVisible(true);
+					}
 					this.target.elem = false;
 					this.target.ry = -pointer.Xi * 0.01;
 					this.target.rx = (pointer.Y - scr.height * 0.5) / (scr.height * 0.5);
@@ -298,16 +680,74 @@ body {
 			if (e.button === 1) e.preventDefault();
 		}, { passive: false });
 
+		// ---- 聚焦状态键盘导航 / ESC 返回展厅中央 ----
+		document.addEventListener("keydown", function (e) {
+			if (!camera.target.elem) return;
+			if (e.key === "Escape" || e.keyCode === 27) {
+				e.preventDefault();
+				returnToGallery();
+			} else if (e.key === "ArrowLeft" || e.keyCode === 37) {
+				e.preventDefault();
+				goToPreviousMemory();
+			} else if (e.key === "ArrowRight" || e.keyCode === 39) {
+				e.preventDefault();
+				goToNextMemory();
+			}
+		}, false);
+
 		// ---- create images ----
 		for (var i = 0, img; img = json.imgdata[i++];) {
 			diapo.push(
 				new Diapo(
 					json.options.imagesPath,
 					img,
-					json.structure
+					json.structure,
+					i - 1
 				)
 			);
 		}
+
+		// ---- focused gallery navigation controls ----
+		var previousButton = document.getElementById("memoryPrev");
+		var nextButton = document.getElementById("memoryNext");
+
+		var stopNavigationPointer = function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+		};
+		previousButton.addEventListener("mousedown", stopNavigationPointer, false);
+		nextButton.addEventListener("mousedown", stopNavigationPointer, false);
+
+		previousButton.addEventListener("click", function (e) {
+			stopNavigationPointer(e);
+			wakeGalleryNavigation(true);
+			goToPreviousMemory();
+		}, false);
+		nextButton.addEventListener("click", function (e) {
+			stopNavigationPointer(e);
+			wakeGalleryNavigation(true);
+			goToNextMemory();
+		}, false);
+
+		var bindNavigationAwakeState = function (button) {
+			button.addEventListener("mouseenter", function () {
+				wakeGalleryNavigation(false);
+			}, false);
+			button.addEventListener("mousemove", function () {
+				wakeGalleryNavigation(false);
+			}, false);
+			button.addEventListener("mouseleave", function () {
+				if (camera.target.elem) wakeGalleryNavigation(true);
+			}, false);
+			button.addEventListener("focus", function () {
+				wakeGalleryNavigation(false);
+			}, false);
+			button.addEventListener("blur", function () {
+				if (camera.target.elem) scheduleGalleryNavigationIdle();
+			}, false);
+		};
+		bindNavigationAwakeState(previousButton);
+		bindNavigationAwakeState(nextButton);
 		// ---- start engine ---- >>>
 		setInterval(function() {
 			quality = (fps > 50) ? [2,3] : [1,2];
@@ -424,21 +864,33 @@ body {
 })().load({
 	imgdata:[
 		// north
-		{img:'images/1.jpg', x:-1000, y:0, z:1500, nx:0, nz:1},
-		{img:'images/2.jpg', x:0,     y:0, z:1500, nx:0, nz:1},
-		{img:'images/3.jpg', x:1000,  y:0, z:1500, nx:0, nz:1},
+		{img:'images/1.jpg', x:-1000, y:0, z:1500, nx:0, nz:1,
+			title:'记忆 01', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/2.jpg', x:0,     y:0, z:1500, nx:0, nz:1,
+			title:'记忆 02', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/3.jpg', x:1000,  y:0, z:1500, nx:0, nz:1,
+			title:'记忆 03', date:'', location:'', text:'在这里写下这一刻的故事。'},
 		// east
-		{img:'images/4.jpg', x:1500,  y:0, z:1000, nx:-1, nz:0},
-		{img:'images/5.jpg', x:1500,  y:0, z:0, nx:-1, nz:0},
-		{img:'images/6.jpg', x:1500,  y:0, z:-1000, nx:-1, nz:0},
+		{img:'images/4.jpg', x:1500,  y:0, z:1000, nx:-1, nz:0,
+			title:'记忆 04', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/5.jpg', x:1500,  y:0, z:0, nx:-1, nz:0,
+			title:'记忆 05', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/6.jpg', x:1500,  y:0, z:-1000, nx:-1, nz:0,
+			title:'记忆 06', date:'', location:'', text:'在这里写下这一刻的故事。'},
 		// south
-		{img:'images/7.jpg', x:1000,  y:0, z:-1500, nx:0, nz:-1},
-		{img:'images/8.jpg', x:0,     y:0, z:-1500, nx:0, nz:-1},
-		{img:'images/9.jpg', x:-1000, y:0, z:-1500, nx:0, nz:-1},
+		{img:'images/7.jpg', x:1000,  y:0, z:-1500, nx:0, nz:-1,
+			title:'记忆 07', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/8.jpg', x:0,     y:0, z:-1500, nx:0, nz:-1,
+			title:'记忆 08', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/9.jpg', x:-1000, y:0, z:-1500, nx:0, nz:-1,
+			title:'记忆 09', date:'', location:'', text:'在这里写下这一刻的故事。'},
 		// west
-		{img:'images/10.jpg', x:-1500, y:0, z:-1000, nx:1, nz:0},
-		{img:'images/11.jpg', x:-1500, y:0, z:0, nx:1, nz:0},
-		{img:'images/12.jpg', x:-1500, y:0, z:1000, nx:1, nz:0}
+		{img:'images/10.jpg', x:-1500, y:0, z:-1000, nx:1, nz:0,
+			title:'记忆 10', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/11.jpg', x:-1500, y:0, z:0, nx:1, nz:0,
+			title:'记忆 11', date:'', location:'', text:'在这里写下这一刻的故事。'},
+		{img:'images/12.jpg', x:-1500, y:0, z:1000, nx:1, nz:0,
+			title:'记忆 12', date:'', location:'', text:'在这里写下这一刻的故事。'}
 	],
 	structure:[
 		{
@@ -545,6 +997,44 @@ body {
 	<div class="memory-heading__subtitle">
 		<span id="memorySubtitle"></span>
 	</div>
+</div>
+
+<div id="memoryCaption" class="memory-caption" aria-hidden="true">
+	<div class="memory-caption__accent"></div>
+	<div id="memoryCaptionMeta" class="memory-caption__meta memory-caption__item">
+		<span id="memoryDate"></span><span id="memoryCaptionSeparator" class="memory-caption__separator"></span><span id="memoryLocation"></span>
+	</div>
+	<div id="memoryCaptionTitle" class="memory-caption__title memory-caption__item"></div>
+	<div id="memoryCaptionText" class="memory-caption__text memory-caption__item"></div>
+</div>
+
+<div id="memoryNavigation" class="memory-navigation" aria-hidden="true">
+	<button id="memoryPrev" class="memory-navigation__button memory-navigation__button--prev" type="button" aria-label="上一张记忆">
+		<svg class="memory-navigation__icon" viewBox="0 0 36 48" aria-hidden="true" focusable="false">
+			<defs>
+				<linearGradient id="memoryGlassPrev" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0" stop-color="#ffffff" stop-opacity="0.82"></stop>
+					<stop offset="0.48" stop-color="#ffffff" stop-opacity="0.46"></stop>
+					<stop offset="1" stop-color="#d9dfe3" stop-opacity="0.28"></stop>
+				</linearGradient>
+			</defs>
+			<rect class="memory-navigation__glass-bar" x="6" y="21" width="24" height="6" rx="3" fill="url(#memoryGlassPrev)" transform="rotate(-45 9 24)"></rect>
+			<rect class="memory-navigation__glass-bar" x="6" y="21" width="24" height="6" rx="3" fill="url(#memoryGlassPrev)" transform="rotate(45 9 24)"></rect>
+		</svg>
+	</button>
+	<button id="memoryNext" class="memory-navigation__button memory-navigation__button--next" type="button" aria-label="下一张记忆">
+		<svg class="memory-navigation__icon" viewBox="0 0 36 48" aria-hidden="true" focusable="false">
+			<defs>
+				<linearGradient id="memoryGlassNext" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0" stop-color="#ffffff" stop-opacity="0.82"></stop>
+					<stop offset="0.48" stop-color="#ffffff" stop-opacity="0.46"></stop>
+					<stop offset="1" stop-color="#d9dfe3" stop-opacity="0.28"></stop>
+				</linearGradient>
+			</defs>
+			<rect class="memory-navigation__glass-bar" x="6" y="21" width="24" height="6" rx="3" fill="url(#memoryGlassNext)" transform="rotate(45 27 24)"></rect>
+			<rect class="memory-navigation__glass-bar" x="6" y="21" width="24" height="6" rx="3" fill="url(#memoryGlassNext)" transform="rotate(-45 27 24)"></rect>
+		</svg>
+	</button>
 </div>
 
 <a class="back-home" href="../">
