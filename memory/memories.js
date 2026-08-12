@@ -93,5 +93,19 @@ window.MEMORIES = [
 		date: "",
 		location: "",
 		text: "在这里写下这一刻的故事。"
+	},
+	{
+		image: "images/13.jpg",
+		title: "记忆 13",
+		date: "",
+		location: "",
+		text: "在这里写下这一刻的故事。"
+	},
+	{
+		image: "images/14.jpg",
+		title: "记忆 14",
+		date: "",
+		location: "",
+		text: "在这里写下这一刻的故事。"
 	}
 ];
