@@ -402,46 +402,74 @@ body {
 
 "use strict";
 
-var memoryPositions = [
-	// north
-	{x:-1000, y:0, z:1500, nx:0, nz:1},
-	{x:0,     y:0, z:1500, nx:0, nz:1},
-	{x:1000,  y:0, z:1500, nx:0, nz:1},
-	// east
-	{x:1500,  y:0, z:1000, nx:-1, nz:0},
-	{x:1500,  y:0, z:0, nx:-1, nz:0},
-	{x:1500,  y:0, z:-1000, nx:-1, nz:0},
-	// south
-	{x:1000,  y:0, z:-1500, nx:0, nz:-1},
-	{x:0,     y:0, z:-1500, nx:0, nz:-1},
-	{x:-1000, y:0, z:-1500, nx:0, nz:-1},
-	// west
-	{x:-1500, y:0, z:-1000, nx:1, nz:0},
-	{x:-1500, y:0, z:0, nx:1, nz:0},
-	{x:-1500, y:0, z:1000, nx:1, nz:0}
-];
+var GALLERY_PHOTO_SPACING = 1000;
+var GALLERY_EDGE_MARGIN = 500;
+var GALLERY_MIN_RADIUS = 1500;
 
-var memoryImageData = (function () {
-	var memories = window.MEMORIES;
-	var imageData = [];
-	var count;
+function calculateWallCounts(memoryCount) {
+	var base = Math.floor(memoryCount / 4);
+	var remainder = memoryCount % 4;
+	var counts = [];
 
-	if (!Array.isArray(memories)) {
-		console.error("MEMORIES 数据不存在或格式错误：应为数组。");
-		return imageData;
+	for (var i = 0; i < 4; i++) {
+		counts.push(base + (i < remainder ? 1 : 0));
 	}
-	if (memories.length > memoryPositions.length) {
-		console.warn("当前 3D 展厅只有 12 个展示位置，多余内容尚未展示。");
-	}
+	return counts;
+}
 
-	count = Math.min(memories.length, memoryPositions.length);
+function generateWallOffsets(count, spacing) {
+	var offsets = [];
 	for (var i = 0; i < count; i++) {
+		offsets.push((i - (count - 1) / 2) * spacing);
+	}
+	return offsets;
+}
+
+function calculateGalleryRadius(wallCounts) {
+	var maxPerWall = Math.max.apply(Math, wallCounts);
+	var halfSpan = Math.max(0, (maxPerWall - 1) / 2 * GALLERY_PHOTO_SPACING);
+	return Math.max(GALLERY_MIN_RADIUS, halfSpan + GALLERY_EDGE_MARGIN);
+}
+
+function generateGalleryPositions(memoryCount) {
+	var wallCounts = calculateWallCounts(memoryCount);
+	var galleryRadius = calculateGalleryRadius(wallCounts);
+	var positions = [];
+	var offsets;
+	var i;
+
+	// North: left to right.
+	offsets = generateWallOffsets(wallCounts[0], GALLERY_PHOTO_SPACING);
+	for (i = 0; i < offsets.length; i++) {
+		positions.push({x:offsets[i], y:0, z:galleryRadius, nx:0, nz:1});
+	}
+
+	// East: north to south.
+	offsets = generateWallOffsets(wallCounts[1], GALLERY_PHOTO_SPACING);
+	for (i = 0; i < offsets.length; i++) {
+		positions.push({x:galleryRadius, y:0, z:-offsets[i], nx:-1, nz:0});
+	}
+
+	// South: east to west.
+	offsets = generateWallOffsets(wallCounts[2], GALLERY_PHOTO_SPACING);
+	for (i = 0; i < offsets.length; i++) {
+		positions.push({x:-offsets[i], y:0, z:-galleryRadius, nx:0, nz:-1});
+	}
+
+	// West: south to north.
+	offsets = generateWallOffsets(wallCounts[3], GALLERY_PHOTO_SPACING);
+	for (i = 0; i < offsets.length; i++) {
+		positions.push({x:-galleryRadius, y:0, z:offsets[i], nx:1, nz:0});
+	}
+
+	return positions;
+}
+
+function buildGalleryImageData(memories, positions) {
+	var imageData = [];
+	for (var i = 0; i < memories.length; i++) {
 		var memory = memories[i];
-		var position = memoryPositions[i];
-		if (!memory || typeof memory !== "object" || typeof memory.image !== "string" || !memory.image) {
-			console.error("MEMORIES[" + i + "] 格式错误：缺少有效的 image。");
-			continue;
-		}
+		var position = positions[i];
 		imageData.push({
 			img: memory.image,
 			x: position.x,
@@ -453,6 +481,30 @@ var memoryImageData = (function () {
 		});
 	}
 	return imageData;
+}
+
+var memoryImageData = (function () {
+	var memories = window.MEMORIES;
+	var validMemories = [];
+
+	if (!Array.isArray(memories)) {
+		console.error("MEMORIES 数据不存在或格式错误：应为数组。");
+		return [];
+	}
+	for (var i = 0; i < memories.length; i++) {
+		var memory = memories[i];
+		if (!memory || typeof memory !== "object" || typeof memory.image !== "string" || !memory.image) {
+			console.error("MEMORIES[" + i + "] 格式错误：缺少有效的 image。");
+			continue;
+		}
+		validMemories.push(memory);
+	}
+	if (!validMemories.length) console.info("暂无记忆内容。");
+
+	return buildGalleryImageData(
+		validMemories,
+		generateGalleryPositions(validMemories.length)
+	);
 })();
 
 (function () {
@@ -532,7 +584,7 @@ var memoryImageData = (function () {
 	},
 	showGalleryNavigation = function () {
 		var navigation = document.getElementById("memoryNavigation");
-		if (!navigation) return;
+		if (!navigation || diapo.length <= 1) return;
 		navigation.classList.add("memory-navigation--visible");
 		navigation.setAttribute("aria-hidden", "false");
 		wakeGalleryNavigation(true);
@@ -570,10 +622,10 @@ var memoryImageData = (function () {
 		focusMemory(diapo[index]);
 	},
 	goToPreviousMemory = function () {
-		if (camera.target.elem) focusDiapoByIndex(camera.target.elem.index - 1);
+		if (camera.target.elem && diapo.length > 1) focusDiapoByIndex(camera.target.elem.index - 1);
 	},
 	goToNextMemory = function () {
-		if (camera.target.elem) focusDiapoByIndex(camera.target.elem.index + 1);
+		if (camera.target.elem && diapo.length > 1) focusDiapoByIndex(camera.target.elem.index + 1);
 	},
 	returnToGallery = function () {
 		hideMemoryCaption();
