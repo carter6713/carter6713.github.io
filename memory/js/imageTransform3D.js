@@ -138,6 +138,7 @@ ge1doot.transform3D.Point.prototype.projection = function () {
 /* ==== triangle constructor ==== */
 ge1doot.transform3D.Triangle = function (parent, p0, p1, p2) {
 	this.ctx = parent.ctx;
+	this.parent = parent;   // 改为引用父级，draw 时取缩放纹理
 	this.texture = parent.texture;
 	this.p0  = p0;
 	this.p1  = p1;
@@ -192,7 +193,7 @@ ge1doot.transform3D.Triangle.prototype.draw = function () {
 			 (this.p0.tx * (t4 - t6) + this.p0.ty * (t8 - t9) + this.pxy * this.p0.Y) / this.d  // dy
 		);
 		// ---- draw ----
-		this.ctx.drawImage(this.texture, 0, 0);
+		this.ctx.drawImage(this.parent.scaledTexture || this.texture, 0, 0);
 		this.ctx.restore();
 	}
 	return this.next;
@@ -213,6 +214,7 @@ ge1doot.transform3D.Image = function (parent, imgSrc, lev, callback) {
 	this.level         = lev || 1;
 	this.visible       = false;
 	this.t             = false;
+	this.scaledTexture = null;  // 缩放后的纹理（性能优化）
 	if (!ge1doot.transform3D.Point.prototype.scr) {
 		ge1doot.transform3D.Point.prototype.scr    = ge1doot.screen;
 		ge1doot.transform3D.Point.prototype.camera = ge1doot.camera;
@@ -232,9 +234,28 @@ ge1doot.transform3D.Image.prototype.loading = function () {
 	if (this.texture.complete) {
 		var dir = [0,1,1,0,0,0,1,1];
 		this.isLoading = false;
-		// ---- image size ----
-		this.textureWidth = this.texture.width;
-		this.textureHeight = this.texture.height;
+		// ---- 性能优化：把原图缩成小纹理，避免每帧对超大图做仿射变换 ----
+		// 手机原图可能 4032×3024，绘制极慢；这里统一缩到最大边 800px。
+		var MAX_TEX = 800;
+		var ow = this.texture.width, oh = this.texture.height;
+		if (ow > MAX_TEX || oh > MAX_TEX) {
+			var s = Math.min(MAX_TEX / ow, MAX_TEX / oh);
+			var cw = Math.max(1, Math.round(ow * s));
+			var ch = Math.max(1, Math.round(oh * s));
+			var cv = document.createElement("canvas");
+			cv.width = cw;
+			cv.height = ch;
+			cv.getContext("2d").drawImage(this.texture, 0, 0, cw, ch);
+			this.scaledTexture = cv;
+		} else {
+			this.scaledTexture = this.texture;
+		}
+
+		// 纹理坐标必须和实际参与绘制的纹理尺寸一致。
+		// 如果这里仍使用原图尺寸，原图越大，缩小后的纹理就会被画得越小。
+		this.textureWidth = this.scaledTexture.width;
+		this.textureHeight = this.scaledTexture.height;
+
 		// ---- isLoaded callback ---
 		this.callback && this.callback.isLoaded && this.callback.isLoaded(this);
 		// ---- texture position ----

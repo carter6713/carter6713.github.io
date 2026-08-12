@@ -71,6 +71,7 @@ body {
 (function () {
 	/* ==== definitions ==== */
 	var diapo = [], layers = [], ctx, pointer, scr, camera, light, fps = 0, quality = [1,2],
+		baseFocalLength = 0, zoom = 1, targetZoom = 1,
 	// ---- poly constructor ----
 	Poly = function (parent, face) {
 		this.parent = parent;
@@ -154,14 +155,18 @@ body {
 			}
 		});
 		// ---- init camera ----
+		baseFocalLength = Math.sqrt(scr.width) * 10;
 		camera = new ge1doot.transform3D.Camera({
-			focalLength: Math.sqrt(scr.width) * 10,
+			focalLength: baseFocalLength,
 			easeTranslation: 0.025,
 			easeRotation: 0.06,
 			disableRz: true
 		}, {
 			move: function () {
 				this.over = false;
+				// ---- smooth optical zoom: change field of view, never camera position ----
+				zoom += (targetZoom - zoom) * 0.12;
+				this.focalLength = baseFocalLength * zoom;
 				// ---- rotation ----
 				if (pointer.isDraging) {
 					this.target.elem = false;
@@ -180,6 +185,38 @@ body {
 		});
 		camera.z  = -10000;
 		camera.py = 0;
+
+		// ---- 鼠标滚轮缩放 ----
+		// 使用焦距实现屏幕中心缩放，不移动相机，因此旋转视角后也不会横向漂移。
+		scr.elem.addEventListener("wheel", function (e) {
+			e.preventDefault();
+
+			// 兼容鼠标滚轮、触控板以及不同浏览器的 deltaMode。
+			var delta = e.deltaY;
+			if (e.deltaMode === 1) delta *= 16;
+			else if (e.deltaMode === 2) delta *= scr.height;
+
+			// 乘法缩放使每一档的视觉变化保持一致，范围固定为 0.5×–3×。
+			targetZoom *= Math.exp(-delta * 0.0015);
+			targetZoom = Math.max(0.5, Math.min(3, targetZoom));
+		}, { passive: false });
+
+		// ---- 中键（滚轮按下）只重置缩放比例，保持当前朝向和位置 ----
+		// 用捕获阶段 + stopPropagation，阻止中键事件传到 ge1doot 的 Pointer，
+		// 否则 Pointer 会把中键当成左键拖动，导致 Xi/Yi 错乱、视角乱跑。
+		scr.elem.addEventListener("mousedown", function (e) {
+			if (e.button === 1) {
+				// button === 1 是中键
+				e.preventDefault();
+				e.stopPropagation();
+				targetZoom = 1;
+			}
+		}, true);
+		// 阻止中键的默认"自动滚动"行为
+		scr.elem.addEventListener("auxclick", function (e) {
+			if (e.button === 1) e.preventDefault();
+		}, { passive: false });
+
 		// ---- create images ----
 		for (var i = 0, img; img = json.imgdata[i++];) {
 			diapo.push(
@@ -250,10 +287,9 @@ body {
 		// ---- create points ----
 		var d = [-1,1,1,-1,1,1,-1,-1];
 
-		// ---- 自适应缩放：手机原图尺寸太大，
-		//      会把 3D 展架撑爆，这里统一缩进 640×380 区域 ----
-		var maxWidth = 640;
-		var maxHeight = 380;
+		// ---- 自适应缩放：保持原图比例，并放进更醒目的 920×690 展示区域 ----
+		var maxWidth = 920;
+		var maxHeight = 690;
 
 		var scale = Math.min(
 			maxWidth / img.texture.width,
