@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>记忆 - 6+7</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #111;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                "Microsoft YaHei",
+                sans-serif;
+        }
+
+        /* ---------- 3D 场景 ---------- */
+
+        .scene {
+            width: 100%;
+            height: 100%;
+
+            perspective: 1100px;
+
+            cursor: grab;
+
+            overflow: hidden;
+        }
+
+        .scene:active {
+            cursor: grabbing;
+        }
+
+        /* ---------- 相机 ---------- */
+
+        .world {
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width: 0;
+            height: 0;
+
+            transform-style: preserve-3d;
+
+            transform:
+                translateZ(-900px)
+                rotateX(0deg)
+                rotateY(0deg);
+        }
+
+        /* ---------- 照片 ---------- */
+
+        .photo {
+            position: absolute;
+
+            width: 340px;
+            height: 220px;
+
+            left: -170px;
+            top: -110px;
+
+            object-fit: cover;
+
+            border: 8px solid white;
+
+            background: white;
+
+            box-shadow:
+                0 20px 45px rgba(0, 0, 0, 0.35);
+
+            backface-visibility: visible;
+
+            user-select: none;
+
+            transition:
+                filter 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        .photo:hover {
+            filter: brightness(1.08);
+
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.55);
+        }
+
+
+        /* =====================================================
+           北面
+           ===================================================== */
+
+        .photo-1 {
+            transform:
+                translate3d(-420px, 0, -700px)
+                rotateY(0deg);
+        }
+
+        .photo-2 {
+            transform:
+                translate3d(0, 0, -700px)
+                rotateY(0deg);
+        }
+
+        .photo-3 {
+            transform:
+                translate3d(420px, 0, -700px)
+                rotateY(0deg);
+        }
+
+
+        /* =====================================================
+           东面
+           ===================================================== */
+
+        .photo-4 {
+            transform:
+                translate3d(700px, 0, -420px)
+                rotateY(-90deg);
+        }
+
+        .photo-5 {
+            transform:
+                translate3d(700px, 0, 0)
+                rotateY(-90deg);
+        }
+
+        .photo-6 {
+            transform:
+                translate3d(700px, 0, 420px)
+                rotateY(-90deg);
+        }
+
+
+        /* =====================================================
+           南面
+           ===================================================== */
+
+        .photo-7 {
+            transform:
+                translate3d(420px, 0, 700px)
+                rotateY(180deg);
+        }
+
+        .photo-8 {
+            transform:
+                translate3d(0, 0, 700px)
+                rotateY(180deg);
+        }
+
+        .photo-9 {
+            transform:
+                translate3d(-420px, 0, 700px)
+                rotateY(180deg);
+        }
+
+
+        /* =====================================================
+           西面
+           ===================================================== */
+
+        .photo-10 {
+            transform:
+                translate3d(-700px, 0, 420px)
+                rotateY(90deg);
+        }
+
+        .photo-11 {
+            transform:
+                translate3d(-700px, 0, 0)
+                rotateY(90deg);
+        }
+
+        .photo-12 {
+            transform:
+                translate3d(-700px, 0, -420px)
+                rotateY(90deg);
+        }
+
+
+        /* ---------- 页面标题 ---------- */
+
+        .title {
+            position: fixed;
+
+            top: 28px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            color: rgba(255, 255, 255, 0.9);
+
+            font-size: 20px;
+            font-weight: 300;
+
+            letter-spacing: 8px;
+
+            z-index: 10;
+
+            pointer-events: none;
+
+            text-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+
+        /* ---------- 操作提示 ---------- */
+
+        .tips {
+            position: fixed;
+
+            bottom: 25px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            color: rgba(255, 255, 255, 0.55);
+
+            font-size: 13px;
+            letter-spacing: 2px;
+
+            z-index: 10;
+
+            pointer-events: none;
+        }
+
+
+        /* ---------- 返回主页 ---------- */
+
+        .back {
+            position: fixed;
+
+            top: 25px;
+            left: 30px;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.5);
+
+            border-radius: 20px;
+
+            padding: 8px 16px;
+
+            z-index: 20;
+
+            background:
+                rgba(0, 0, 0, 0.25);
+
+            transition:
+                background 0.25s ease;
+        }
+
+        .back:hover {
+            background:
+                rgba(255, 255, 255, 0.2);
+        }
+
+
+        /* ---------- 手机 ---------- */
+
+        @media (max-width: 700px) {
+
+            .photo {
+                width: 250px;
+                height: 165px;
+
+                left: -125px;
+                top: -82px;
+            }
+
+            .title {
+                font-size: 16px;
+                letter-spacing: 5px;
+            }
+
+            .back {
+                left: 15px;
+                top: 15px;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <a
+        class="back"
+        href="../"
+    >
+        ← 返回主页
+    </a>
+
+
+    <div class="title">
+        记 忆
+    </div>
+
+
+    <div class="scene" id="scene">
+
+        <div class="world" id="world">
+
+            <img
+                class="photo photo-1"
+                src="./images/1.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-2"
+                src="./images/2.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-3"
+                src="./images/3.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-4"
+                src="./images/4.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-5"
+                src="./images/5.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-6"
+                src="./images/6.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-7"
+                src="./images/7.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-8"
+                src="./images/8.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-9"
+                src="./images/9.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-10"
+                src="./images/10.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-11"
+                src="./images/11.jpg"
+                alt=""
+                draggable="false"
+            >
+
+            <img
+                class="photo photo-12"
+                src="./images/12.jpg"
+                alt=""
+                draggable="false"
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="tips">
+        拖动鼠标旋转 · 滚轮调整距离
+    </div>
+
+
+    <script>
+
+        const scene = document.getElementById("scene");
+        const world = document.getElementById("world");
+
+
+        let rotateX = 0;
+        let rotateY = 0;
+
+        let distance = -900;
+
+
+        let dragging = false;
+
+        let lastX = 0;
+        let lastY = 0;
+
+
+        function updateWorld() {
+
+            world.style.transform =
+                `
+                translateZ(${distance}px)
+                rotateX(${rotateX}deg)
+                rotateY(${rotateY}deg)
+                `;
+
+        }
+
+
+        /* ---------- 鼠标按下 ---------- */
+
+        scene.addEventListener(
+            "mousedown",
+            function (event) {
+
+                dragging = true;
+
+                lastX = event.clientX;
+                lastY = event.clientY;
+
+            }
+        );
+
+
+        /* ---------- 鼠标移动 ---------- */
+
+        window.addEventListener(
+            "mousemove",
+            function (event) {
+
+                if (!dragging) {
+                    return;
+                }
+
+
+                const deltaX =
+                    event.clientX - lastX;
+
+                const deltaY =
+                    event.clientY - lastY;
+
+
+                rotateY += deltaX * 0.25;
+
+                rotateX -= deltaY * 0.15;
+
+
+                rotateX =
+                    Math.max(
+                        -30,
+                        Math.min(
+                            30,
+                            rotateX
+                        )
+                    );
+
+
+                lastX = event.clientX;
+                lastY = event.clientY;
+
+
+                updateWorld();
+
+            }
+        );
+
+
+        /* ---------- 鼠标松开 ---------- */
+
+        window.addEventListener(
+            "mouseup",
+            function () {
+
+                dragging = false;
+
+            }
+        );
+
+
+        /* ---------- 滚轮缩放 ---------- */
+
+        scene.addEventListener(
+            "wheel",
+            function (event) {
+
+                event.preventDefault();
+
+
+                distance +=
+                    event.deltaY * 0.7;
+
+
+                distance =
+                    Math.max(
+                        -1800,
+                        Math.min(
+                            -350,
+                            distance
+                        )
+                    );
+
+
+                updateWorld();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        /* ---------- 手机触控 ---------- */
+
+        scene.addEventListener(
+            "touchstart",
+            function (event) {
+
+                if (
+                    event.touches.length !== 1
+                ) {
+                    return;
+                }
+
+
+                dragging = true;
+
+                lastX =
+                    event.touches[0].clientX;
+
+                lastY =
+                    event.touches[0].clientY;
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        scene.addEventListener(
+            "touchmove",
+            function (event) {
+
+                if (
+                    !dragging ||
+                    event.touches.length !== 1
+                ) {
+                    return;
+                }
+
+
+                const x =
+                    event.touches[0].clientX;
+
+                const y =
+                    event.touches[0].clientY;
+
+
+                rotateY +=
+                    (x - lastX) * 0.25;
+
+                rotateX -=
+                    (y - lastY) * 0.15;
+
+
+                rotateX =
+                    Math.max(
+                        -30,
+                        Math.min(
+                            30,
+                            rotateX
+                        )
+                    );
+
+
+                lastX = x;
+                lastY = y;
+
+
+                updateWorld();
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        scene.addEventListener(
+            "touchend",
+            function () {
+
+                dragging = false;
+
+            }
+        );
+
+
+        updateWorld();
+
+    </script>
+
+</body>
+
+</html>
