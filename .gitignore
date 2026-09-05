@@ -1,0 +1,6 @@
+.codex-tmp/
+__pycache__/
+*.pyc
+blog/img/research-notes/*.tiff
+blog/img/research-notes/*.collision-overlay.pdf
+blog/img/research-notes/*.alignment.svg
