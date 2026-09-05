@@ -68,8 +68,9 @@ def main() -> int:
             continue
         parser = PageParser()
         parser.feed(page.read_text(encoding="utf-8"))
-        if parser.h1 != 1:
-            fail(f"{page.relative_to(ROOT)}: expected one h1, found {parser.h1}", failures)
+        expected_h1 = 0 if page == ROOT / "blog" / "archives" / "index.html" else 1
+        if parser.h1 != expected_h1:
+            fail(f"{page.relative_to(ROOT)}: expected {expected_h1} h1, found {parser.h1}", failures)
         if parser.images != parser.images_with_alt:
             fail(f"{page.relative_to(ROOT)}: image without alt text", failures)
         for attr, value in parser.refs:

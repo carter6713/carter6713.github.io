@@ -1,156 +1,207 @@
-"""Build the lifestyle section as dependency-light static HTML."""
+"""Build life posts with the site's existing Hexo Fluid 1.9.9 markup."""
 
 from __future__ import annotations
 
 import html
+import math
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 import markdown
 
+
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "blog-src" / "life"
 BLOG = ROOT / "blog"
-
-LEGACY_POSTS = [
-    {
-        "title": "我的个人主页搭建记录",
-        "date": "2026-08-11",
-        "url": "/blog/2026/08/11/%E6%88%91%E7%9A%84%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E8%AE%B0%E5%BD%95/",
-        "cover": "/blog/img/blog-index.jpg",
-        "cover_alt": "个人主页搭建记录封面",
-        "category": "建站随笔",
-        "summary": "从零搭建个人主页与博客的过程记录：在技术实现之外，也重新思考公开表达与长期积累。",
-        "tags": ["个人主页", "建站"],
-        "legacy": True,
-    }
-]
+ARTICLE_TEMPLATE = BLOG / "2026" / "08" / "11" / "我的个人主页搭建记录" / "index.html"
+INDEX_START = "<!-- LIFE_POSTS_START -->"
+INDEX_END = "<!-- LIFE_POSTS_END -->"
+ARCHIVE_START = "<!-- LIFE_ARCHIVE_START -->"
+ARCHIVE_END = "<!-- LIFE_ARCHIVE_END -->"
 
 
-def parse_post(path: Path):
+def clean_text(value: str) -> str:
+    """Keep generated HTML diff-friendly without changing Fluid markup."""
+    return re.sub(r"(?:\r?\n)+$", "\n", re.sub(r"[ \t]+(?=\r?$)", "", value, flags=re.M))
+
+
+def parse_post(path: Path) -> dict[str, object]:
     raw = path.read_text(encoding="utf-8")
     match = re.match(r"^---\n(.*?)\n---\n(.*)$", raw, re.S)
     if not match:
         raise ValueError(f"Missing front matter: {path}")
-    meta = {}
+    meta: dict[str, object] = {}
     for line in match.group(1).splitlines():
         key, value = line.split(":", 1)
         meta[key.strip()] = value.strip().strip('"')
-    meta["tags"] = [tag.strip() for tag in meta.get("tags", "").split(",") if tag.strip()]
+    meta["tags"] = [tag.strip() for tag in str(meta.get("tags", "")).split(",") if tag.strip()]
+    meta["markdown"] = match.group(2).strip()
     meta["body"] = markdown.markdown(
-        match.group(2),
+        str(meta["markdown"]),
         extensions=["extra", "sane_lists"],
         output_format="html5",
     )
     return meta
 
 
-def nav():
-    return """
-    <nav class="site-nav" aria-label="主导航">
-      <a class="site-mark" href="/blog/">6+7 / LIFE NOTES</a>
-      <div class="nav-links">
-        <a href="/blog/">文章</a>
-        <a href="/blog/archives/">归档</a>
-        <a href="/blog/about/">关于我</a>
-        <a href="/">主页</a>
-      </div>
-    </nav>"""
+def post_url(post: dict[str, object]) -> str:
+    return f"/blog/{str(post['date']).replace('-', '/')}/{post['slug']}/"
 
 
-def page(title, description, content, canonical):
-    escaped_title = html.escape(title)
-    escaped_desc = html.escape(description)
-    return f"""<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{escaped_desc}">
-  <meta property="og:title" content="{escaped_title}">
-  <meta property="og:description" content="{escaped_desc}">
-  <meta property="og:url" content="{canonical}">
-  <title>{escaped_title} - 6+7</title>
-  <link rel="icon" type="image/svg+xml" href="/images/cowface.svg">
-  <link rel="stylesheet" href="/blog/css/editorial.css">
-</head>
-<body>
-{nav()}
-{content}
-<footer class="site-footer">但行好事，莫问前程 · © 2026 6+7</footer>
-</body>
-</html>
-"""
+def localized_date(date: str) -> str:
+    parsed = datetime.strptime(date, "%Y-%m-%d")
+    return f"{parsed.year}年{parsed.month}月{parsed.day}日"
 
 
-def post_url(post):
-    return post.get("url") or f"/blog/{post['date'].replace('-', '/')}/{post['slug']}/"
-
-
-def render_article(post):
-    url = post_url(post)
-    tags = " · ".join(post["tags"])
-    content = f"""
-    <main class="article-shell">
-      <header class="article-head">
-        <div class="article-meta">{post['date']} · {html.escape(post['category'])} · {html.escape(tags)}</div>
-        <h1>{html.escape(post['title'])}</h1>
-        <p class="article-deck">{html.escape(post['summary'])}</p>
-      </header>
-      <img class="lead-image" src="{post['cover']}" alt="{html.escape(post['cover_alt'])}">
-      <article class="article-body">{post['body']}</article>
-      <div class="article-footer">作者：6+7 · 本文记录可公开的生活片段，照片中的地点与人物信息均按隐私边界处理。</div>
-    </main>"""
-    return page(post["title"], post["summary"], content, f"https://carter6713.github.io{url}")
-
-
-def render_index(posts):
-    cards = []
-    for post in posts:
-        url = post_url(post)
-        cards.append(f"""
-        <article class="post-card">
-          <a href="{url}"><img src="{post['cover']}" alt="{html.escape(post['cover_alt'])}"></a>
-          <div class="card-copy">
-            <div class="card-meta">{post['date']} · {html.escape(post['category'])}</div>
-            <h2><a href="{url}">{html.escape(post['title'])}</a></h2>
-            <p>{html.escape(post['summary'])}</p>
-            <a class="read-more" href="{url}">继续阅读 →</a>
-          </div>
-        </article>""")
-    content = f"""
-    <header class="hero">
-      <div>
-        <div class="eyebrow">Life notes by 6+7</div>
-        <h1>在研究之外，认真生活。</h1>
-        <p>这里不追赶热点，只保存那些值得慢一点看的片刻：器物、光线、散步，以及为什么要把生活写下来。</p>
-      </div>
-      <div class="hero-note">技术与科研笔记放在博客园；这里留给生活。两种记录共同构成一个更完整、也更真实的我。</div>
-    </header>
-    <main class="post-grid">{''.join(cards)}</main>"""
-    return page("生活随笔", "6+7 的个人生活博客", content, "https://carter6713.github.io/blog/")
-
-
-def render_archive(posts):
-    items = "".join(
-        f'<li><time>{post["date"]}</time><a href="{post_url(post)}">{html.escape(post["title"])}</a></li>'
-        for post in posts
+def render_tags(tags: list[str], css_class: str = "") -> str:
+    class_attr = f' class="{css_class}"' if css_class else ""
+    return "\n".join(
+        f'        <a href="/blog/tags/"{class_attr}>#{html.escape(tag)}</a>' for tag in tags
     )
-    content = f'<main class="archive"><div class="eyebrow">Archive</div><h1>文章归档</h1><ul class="archive-list">{items}</ul></main>'
-    return page("文章归档", "生活随笔文章归档", content, "https://carter6713.github.io/blog/archives/")
 
 
-def main():
-    authored_posts = list(parse_post(p) for p in SOURCE.glob("*.md"))
-    posts = sorted(authored_posts + LEGACY_POSTS, key=lambda x: x["date"], reverse=True)
-    for post in authored_posts:
-        target = BLOG / post["date"].replace("-", "/") / post["slug"] / "index.html"
+def render_article(template: str, post: dict[str, object]) -> str:
+    title = str(post["title"])
+    summary = str(post["summary"])
+    date = str(post["date"])
+    cover = str(post["cover"])
+    tags = list(post["tags"])
+    url = post_url(post)
+    absolute_url = f"https://carter6713.github.io{url}index.html"
+    published = f"{date}T00:00:00.000Z"
+    modified = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    text_count = len(re.sub(r"\s+", "", re.sub(r"!\[[^]]*\]\([^)]+\)", "", str(post["markdown"]))))
+    minutes = max(1, math.ceil(text_count / 300))
+
+    result = template
+    replacements = {
+        r'<meta name="description" content="[^"]*">': f'<meta name="description" content="{html.escape(summary)}">',
+        r'<meta property="og:title" content="[^"]*">': f'<meta property="og:title" content="{html.escape(title)}">',
+        r'<meta property="og:url" content="[^"]*">': f'<meta property="og:url" content="{absolute_url}">',
+        r'<meta property="og:description" content="[^"]*">': f'<meta property="og:description" content="{html.escape(summary)}">',
+        r'<meta property="og:image" content="[^"]*">': f'<meta property="og:image" content="https://carter6713.github.io{cover}">',
+        r'<meta property="article:published_time" content="[^"]*">': f'<meta property="article:published_time" content="{published}">',
+        r'<meta property="article:modified_time" content="[^"]*">': f'<meta property="article:modified_time" content="{modified}">',
+        r'<meta name="twitter:image" content="[^"]*">': f'<meta name="twitter:image" content="https://carter6713.github.io{cover}">',
+        r'<title>.*? - 6\+7</title>': f'<title>{html.escape(title)} - 6+7</title>',
+    }
+    for pattern, replacement in replacements.items():
+        result = re.sub(pattern, replacement, result, count=1)
+
+    result = re.sub(r'\n\s*<meta property="article:tag" content="[^"]*">', "", result)
+    head_tags = "".join(f'\n<meta property="article:tag" content="{html.escape(tag)}">' for tag in tags)
+    result = result.replace('<meta name="twitter:card"', f'{head_tags}\n<meta name="twitter:card"', 1)
+    result = re.sub(
+        r"style=\"background: url\('[^']+'\) no-repeat center center; background-size: cover;\"",
+        f"style=\"background: url('{cover}') no-repeat center center; background-size: cover;\"",
+        result,
+        count=1,
+    )
+    result = re.sub(r'<span id="subtitle" data-typed-text="[^"]*"></span>', f'<span id="subtitle" data-typed-text="{html.escape(title)}"></span>', result, count=1)
+    result = re.sub(
+        r'<time datetime="[^"]*" pubdate>\s*.*?\s*</time>',
+        f'<time datetime="{date} 08:00" pubdate>\n          {localized_date(date)} 上午\n        </time>',
+        result,
+        count=1,
+        flags=re.S,
+    )
+    result = re.sub(r'\d+ 字', f'{text_count} 字', result, count=1)
+    result = re.sub(r'\d+ 分钟', f'{minutes} 分钟', result, count=1)
+    result = re.sub(r'<h1 id="seo-header">.*?</h1>', f'<h1 id="seo-header">{html.escape(title)}</h1>', result, count=1)
+    result = re.sub(
+        r'(<div class="markdown-body">\s*).*?(\s*</div>\s*<hr/>)',
+        lambda match: f'{match.group(1)}{post["body"]}{match.group(2)}',
+        result,
+        count=1,
+        flags=re.S,
+    )
+    result = result.replace(
+        'href="/blog/categories/%E6%8A%80%E6%9C%AF/" class="category-chain-item">技术</a>',
+        'href="/blog/categories/" class="category-chain-item">生活</a>',
+    )
+    result = re.sub(
+        r'(<div class="post-meta">\s*<i class="iconfont icon-tags"></i>).*?(\s*</div>)',
+        lambda match: f'{match.group(1)}\n{render_tags(tags, "print-no-link")}\n      {match.group(2)}',
+        result,
+        count=1,
+        flags=re.S,
+    )
+    license_html = (
+        '<div class="license-title">\n'
+        f'      <div>{html.escape(title)}</div>\n'
+        f'      <div>https://carter6713.github.io{url}</div>\n'
+        '    </div>'
+    )
+    result = re.sub(r'<div class="license-title">.*?</div>\s*</div>', license_html, result, count=1, flags=re.S)
+    result = re.sub(r'(<div>发布于</div>\s*<div>).*?(</div>)', rf'\g<1>{localized_date(date)}\2', result, count=1, flags=re.S)
+    return result
+
+
+def index_card(post: dict[str, object]) -> str:
+    url = post_url(post)
+    tags = "\n".join(f'              <a href="/blog/tags/">#{html.escape(tag)}</a>' for tag in list(post["tags"]))
+    return f'''  <div class="row mx-auto index-card">
+    <div class="col-12 col-md-4 m-auto index-img">
+      <a href="{url}" target="_self">
+        <img src="{post['cover']}" srcset="/blog/img/loading.gif" lazyload alt="{html.escape(str(post['title']))}">
+      </a>
+    </div>
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header"><a href="{url}" target="_self">{html.escape(str(post['title']))}</a></h2>
+      <a class="index-excerpt" href="{url}" target="_self"><div>{html.escape(str(post['summary']))}</div></a>
+      <div class="index-btm post-metas">
+        <div class="post-meta mr-3"><i class="iconfont icon-date"></i><time datetime="{post['date']}" pubdate>{post['date']}</time></div>
+        <div class="post-meta mr-3 d-flex align-items-center"><i class="iconfont icon-category"></i><span class="category-chains"><span class="category-chain"><a href="/blog/categories/" class="category-chain-item">生活</a></span></span></div>
+        <div class="post-meta"><i class="iconfont icon-tags"></i>
+{tags}
+        </div>
+      </div>
+    </article>
+  </div>'''
+
+
+def update_index(posts: list[dict[str, object]]) -> None:
+    path = BLOG / "index.html"
+    page = path.read_text(encoding="utf-8")
+    cards = "\n\n".join(index_card(post) for post in posts)
+    block = f"{INDEX_START}\n{cards}\n{INDEX_END}"
+    if INDEX_START in page:
+        page = re.sub(rf'{re.escape(INDEX_START)}.*?{re.escape(INDEX_END)}', block, page, count=1, flags=re.S)
+    else:
+        needle = '<h1 style="display: none">6+7</h1>'
+        page = page.replace(needle, f'{needle}\n\n{block}', 1)
+    path.write_text(clean_text(page), encoding="utf-8")
+
+
+def update_archive(posts: list[dict[str, object]]) -> None:
+    path = BLOG / "archives" / "index.html"
+    page = path.read_text(encoding="utf-8")
+    entries = "\n".join(
+        f'''    <a href="{post_url(post)}" class="list-group-item list-group-item-action">
+      <time>{str(post['date'])[5:]}</time>
+      <div class="list-group-item-title">{html.escape(str(post['title']))}</div>
+    </a>''' for post in posts
+    )
+    block = f"{ARCHIVE_START}\n{entries}\n    {ARCHIVE_END}"
+    page = re.sub(r'共计 \d+ 篇文章', f'共计 {len(posts) + 1} 篇文章', page, count=1)
+    if ARCHIVE_START in page:
+        page = re.sub(rf'{re.escape(ARCHIVE_START)}.*?{re.escape(ARCHIVE_END)}', block, page, count=1, flags=re.S)
+    else:
+        needle = '<p class="h5">2026</p>'
+        page = page.replace(needle, f'{needle}\n      \n    {block}', 1)
+    path.write_text(clean_text(page), encoding="utf-8")
+
+
+def main() -> None:
+    posts = sorted((parse_post(path) for path in SOURCE.glob("*.md")), key=lambda post: str(post["date"]), reverse=True)
+    template = ARTICLE_TEMPLATE.read_text(encoding="utf-8")
+    for post in posts:
+        target = BLOG / str(post["date"]).replace("-", "/") / str(post["slug"]) / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(render_article(post), encoding="utf-8")
-    (BLOG / "index.html").write_text(render_index(posts), encoding="utf-8")
-    archive = BLOG / "archives" / "index.html"
-    archive.parent.mkdir(parents=True, exist_ok=True)
-    archive.write_text(render_archive(posts), encoding="utf-8")
+        target.write_text(clean_text(render_article(template, post)), encoding="utf-8")
+    update_index(posts)
+    update_archive(posts)
 
 
 if __name__ == "__main__":
