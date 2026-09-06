@@ -305,6 +305,40 @@ def adaptation_ladder():
     save(fig, "foundation-model-adaptation")
 
 
+def calibrated_selective_prediction():
+    fig, ax = canvas()
+    ax.text(2, 54.5, "A useful confidence score leads to an auditable decision", fontsize=12, fontweight="bold", color=COLORS["ink"])
+    ax.text(2, 51.0, "Calibrate on validation data, declare a policy and track what the model does not handle", fontsize=8, color=COLORS["gray"])
+
+    box(ax, 2, 29, 15, 13, "Image\nclassifier", face=COLORS["pale_blue"], edge=COLORS["blue"], weight="bold")
+    box(ax, 23, 29, 17, 13, "Raw logits\nand probabilities", face="#F4F5F6", edge=COLORS["gray"], size=7.1, weight="bold")
+    box(ax, 46, 29, 17, 13, "Validation-set\ncalibration", face=COLORS["pale_teal"], edge=COLORS["teal"], size=7.1, weight="bold")
+    box(ax, 69, 29, 14, 13, "Decision\npolicy", face=COLORS["pale_gold"], edge=COLORS["gold"], weight="bold")
+    arrow(ax, (17, 35.5), (23, 35.5), color=COLORS["blue"])
+    arrow(ax, (40, 35.5), (46, 35.5), color=COLORS["teal"])
+    arrow(ax, (63, 35.5), (69, 35.5), color=COLORS["gold"])
+
+    decisions = [
+        (86, 39, "Accept", COLORS["pale_blue"], COLORS["navy"]),
+        (86, 27, "Review", COLORS["pale_gold"], COLORS["gold"]),
+        (86, 15, "Reject", COLORS["pale_red"], COLORS["red"]),
+    ]
+    for x, y, label, face, edge in decisions:
+        box(ax, x, y, 12, 8, label, face=face, edge=edge, size=7.2, weight="bold")
+        arrow(ax, (83, 35.5), (86, y + 4), color=edge, curve=(y - 27) / 60)
+
+    checks = [
+        (4, "Reliability\ndiagram"),
+        (22, "ECE + Brier\nscore"),
+        (40, "Coverage-risk\ncurve"),
+        (58, "Shift-aware\nvalidation"),
+    ]
+    for x, label in checks:
+        box(ax, x, 10, 15, 8, label, face="white", edge=COLORS["line"], size=6.6, weight="bold")
+    ax.text(2, 5.0, "Audit trail: model version · calibration data · threshold · decision · human correction", fontsize=7, color=COLORS["red"])
+    save(fig, "calibrated-selective-prediction")
+
+
 if __name__ == "__main__":
     data_knowledge_loop()
     missing_class_pipeline()
@@ -312,3 +346,4 @@ if __name__ == "__main__":
     leakage_safe_pipeline()
     cross_domain_evaluation()
     adaptation_ladder()
+    calibrated_selective_prediction()

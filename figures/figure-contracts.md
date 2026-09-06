@@ -61,3 +61,13 @@ These figures are conceptual diagrams for public research notes. They contain no
 - Backend and size: Python, 183 mm × 98 mm.
 - Evidence: method-selection logic only; no claim that one adaptation method universally performs best.
 - Reviewer risk: trainable-parameter count is not a substitute for measuring memory, runtime, calibration, or out-of-domain performance.
+
+## Calibrated selective prediction
+
+- Core conclusion: a probability becomes operationally useful only after validation-set calibration and an explicit accept, review, or reject policy.
+- Results-level question: how should a scientific image classifier translate uncertain probabilities into auditable decisions?
+- Archetype: single-panel decision workflow schematic.
+- Target output: web PNG with editable SVG and PDF companions.
+- Backend and size: Python, 183 mm × 98 mm.
+- Evidence: conceptual decision logic only; no empirical performance or safety claim.
+- Reviewer risk: a confidence threshold does not detect every distribution shift and must not be presented as a substitute for external validation.
