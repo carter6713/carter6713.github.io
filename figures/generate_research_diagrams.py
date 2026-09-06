@@ -111,6 +111,11 @@ def save(fig, stem):
         strict=True,
     )
     fig.savefig(OUT / f"{stem}.svg", bbox_inches="tight")
+    svg_path = OUT / f"{stem}.svg"
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines()) + "\n",
+        encoding="utf-8",
+    )
     fig.savefig(OUT / f"{stem}.pdf", bbox_inches="tight")
     fig.savefig(OUT / f"{stem}.png", dpi=600, bbox_inches="tight")
     fig.savefig(OUT / f"{stem}.tiff", dpi=600, bbox_inches="tight")
@@ -211,7 +216,99 @@ def semantic_3d_loop():
     save(fig, "semantic-3d-architecture")
 
 
+def leakage_safe_pipeline():
+    fig, ax = canvas()
+    ax.text(2, 54.5, "A leakage-safe experiment is designed before training", fontsize=12, fontweight="bold", color=COLORS["ink"])
+    ax.text(2, 51.0, "Freeze identities, groups and transforms before the test set becomes visible", fontsize=8, color=COLORS["gray"])
+
+    stages = [
+        (2, 14, "Raw assets\n+ provenance"),
+        (19, 14, "Identity map\n+ duplicate audit"),
+        (36, 14, "Group-aware\nsplit manifest"),
+        (53, 14, "Train-only\npreprocessing"),
+        (70, 14, "Model selection\non validation"),
+        (87, 11, "Locked\ntest"),
+    ]
+    faces = [COLORS["pale_blue"], COLORS["pale_gold"], COLORS["pale_teal"], "#F4F5F6", COLORS["pale_blue"], COLORS["pale_red"]]
+    edges = [COLORS["blue"], COLORS["gold"], COLORS["teal"], COLORS["gray"], COLORS["navy"], COLORS["red"]]
+    for (x, w, label), face, edge in zip(stages, faces, edges):
+        box(ax, x, 30, w, 12, label, face=face, edge=edge, size=7.1, weight="bold")
+    for i in range(len(stages) - 1):
+        x1 = stages[i][0] + stages[i][1]
+        x2 = stages[i + 1][0]
+        arrow(ax, (x1, 36), (x2, 36), color=COLORS["navy"])
+
+    checks = [
+        (4, "File hash"),
+        (20.5, "Near-duplicate"),
+        (38, "Plant / leaf / burst"),
+        (55, "Fit on train only"),
+        (72, "Tune without test"),
+    ]
+    for x, label in checks:
+        box(ax, x, 15, 14, 7, label, face="white", edge=COLORS["line"], size=6.4)
+    ax.plot([86.5, 86.5], [11, 46], color=COLORS["red"], linewidth=1.4, linestyle="--")
+    ax.text(86.5, 9.0, "test boundary", ha="center", fontsize=7, color=COLORS["red"], fontweight="bold")
+    ax.text(2, 6.0, "Audit artifact: immutable split CSV + group IDs + hashes + preprocessing configuration + random seeds", fontsize=7, color=COLORS["gray"])
+    save(fig, "leakage-safe-experiment")
+
+
+def cross_domain_evaluation():
+    fig, ax = canvas()
+    ax.text(2, 54.5, "Cross-domain evaluation needs an explicit held-out world", fontsize=12, fontweight="bold", color=COLORS["ink"])
+    ax.text(2, 51.0, "Define the shift, isolate the target domain and keep model selection inside source domains", fontsize=8, color=COLORS["gray"])
+
+    source_labels = ["Crop A\nlab", "Crop B\nfield", "Crop C\nmobile"]
+    for i, label in enumerate(source_labels):
+        box(ax, 2, 36 - i * 12, 15, 8, label, face=COLORS["pale_blue"], edge=COLORS["blue"], size=7, weight="bold")
+        arrow(ax, (17, 40 - i * 12), (25, 32), color=COLORS["blue"])
+    box(ax, 25, 24, 18, 16, "Source-domain\ntraining", face=COLORS["pale_teal"], edge=COLORS["teal"], weight="bold")
+    box(ax, 49, 32, 17, 10, "Source-only\nvalidation", face=COLORS["pale_gold"], edge=COLORS["gold"], weight="bold")
+    box(ax, 49, 17, 17, 10, "Model & threshold\nselection", face="#F4F5F6", edge=COLORS["gray"], size=7, weight="bold")
+    box(ax, 74, 25, 22, 16, "Held-out target\nCrop D · new site\nnew time", face=COLORS["pale_red"], edge=COLORS["red"], size=6.8, weight="bold")
+    arrow(ax, (43, 32), (49, 37), color=COLORS["teal"])
+    arrow(ax, (57.5, 32), (57.5, 27), color=COLORS["gold"])
+    arrow(ax, (66, 22), (74, 27), color=COLORS["navy"])
+
+    labels = ["crop", "camera", "background", "season"]
+    for i, label in enumerate(labels):
+        box(ax, 24 + i * 16, 7, 13, 6, label, face="white", edge=COLORS["line"], size=6.5)
+    ax.text(2, 5.0, "Report in-domain and out-of-domain results separately; do not tune on target-domain labels.", fontsize=7, color=COLORS["red"])
+    save(fig, "cross-domain-evaluation")
+
+
+def adaptation_ladder():
+    fig, ax = canvas()
+    ax.text(2, 54.5, "Adapt a foundation model by escalating trainable capacity", fontsize=12, fontweight="bold", color=COLORS["ink"])
+    ax.text(2, 51.0, "Start with a frozen backbone; add flexibility only when the same protocol justifies it", fontsize=8, color=COLORS["gray"])
+
+    methods = [
+        (3, 14, "1  Linear probe", "head only"),
+        (21, 17, "2  Prompt tuning", "learned tokens"),
+        (42, 16, "3  Adapters", "small modules"),
+        (62, 14, "4  LoRA", "low-rank updates"),
+        (80, 17, "5  Full tune", "all parameters"),
+    ]
+    for i, (x, w, title, detail) in enumerate(methods):
+        y = 31 + i * 1.7
+        face = ["#F4F5F6", COLORS["pale_blue"], COLORS["pale_teal"], COLORS["pale_gold"], COLORS["pale_red"]][i]
+        edge = [COLORS["gray"], COLORS["blue"], COLORS["teal"], COLORS["gold"], COLORS["red"]][i]
+        box(ax, x, y, w, 11, f"{title}\n{detail}", face=face, edge=edge, size=6.8, weight="bold")
+        if i < len(methods) - 1:
+            nx = methods[i + 1][0]
+            arrow(ax, (x + w, y + 5.5), (nx, 32 + (i + 1) * 1.7 + 5.5), color=COLORS["navy"])
+
+    box(ax, 8, 10, 25, 10, "Evidence\nmacro-F1 · calibration · OOD", face="white", edge=COLORS["line"], size=7, weight="bold")
+    box(ax, 38, 10, 25, 10, "Cost\nGPU memory · time · storage", face="white", edge=COLORS["line"], size=7, weight="bold")
+    box(ax, 68, 10, 25, 10, "Stability\nseeds · sensitivity · drift", face="white", edge=COLORS["line"], size=7, weight="bold")
+    ax.text(50, 6.0, "Escalate only when added flexibility improves the pre-declared objective without weakening generalization.", ha="center", fontsize=7, color=COLORS["red"])
+    save(fig, "foundation-model-adaptation")
+
+
 if __name__ == "__main__":
     data_knowledge_loop()
     missing_class_pipeline()
     semantic_3d_loop()
+    leakage_safe_pipeline()
+    cross_domain_evaluation()
+    adaptation_ladder()

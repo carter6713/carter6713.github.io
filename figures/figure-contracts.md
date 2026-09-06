@@ -31,3 +31,33 @@ These figures are conceptual diagrams for public research notes. They contain no
 - Backend and size: Python, 183 mm × 98 mm.
 - Evidence: architecture and data-flow logic only.
 - Reviewer risk: the diagram describes the public system pattern, not confidential deployment details or a claim of fully automatic 3D generation.
+
+## Leakage-safe experiment pipeline
+
+- Core conclusion: leakage prevention starts before model training by grouping related observations, freezing the split manifest, and fitting every learned transform on training data only.
+- Results-level question: which checkpoints keep a small-sample vision benchmark independent and reproducible?
+- Archetype: single-panel workflow schematic.
+- Target output: web PNG with editable SVG and PDF companions.
+- Backend and size: Python, 183 mm × 98 mm.
+- Evidence: procedural safeguards only; no experimental observations or performance claims.
+- Reviewer risk: perceptual hashes and metadata checks reduce accidental duplication but do not prove semantic independence.
+
+## Cross-domain evaluation matrix
+
+- Core conclusion: cross-domain recognition should separate crop, acquisition, background, and time shifts, then hold out a complete domain for final evaluation.
+- Results-level question: how can an evaluation matrix distinguish in-domain fitting from transfer to a genuinely unseen plant-disease domain?
+- Archetype: single-panel workflow schematic.
+- Target output: web PNG with editable SVG and PDF companions.
+- Backend and size: Python, 183 mm × 98 mm.
+- Evidence: benchmark design logic only; no unpublished model details or numerical results.
+- Reviewer risk: domain labels are task-dependent and must be defined from collection provenance rather than inferred only from pixels.
+
+## Foundation-model adaptation ladder
+
+- Core conclusion: adaptation should begin with the smallest trainable surface and escalate only when a fixed validation protocol shows that additional flexibility is needed.
+- Results-level question: how should a small scientific-vision project choose among probing, prompting, adapters, LoRA, and full fine-tuning?
+- Archetype: single-panel decision schematic.
+- Target output: web PNG with editable SVG and PDF companions.
+- Backend and size: Python, 183 mm × 98 mm.
+- Evidence: method-selection logic only; no claim that one adaptation method universally performs best.
+- Reviewer risk: trainable-parameter count is not a substitute for measuring memory, runtime, calibration, or out-of-domain performance.

@@ -10,13 +10,23 @@ from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def life_article_pages() -> list[Path]:
+    pages: list[Path] = []
+    for source in sorted((ROOT / "blog-src" / "life").glob("*.md")):
+        text = source.read_text(encoding="utf-8")
+        date = re.search(r"^date:\s*(\d{4}-\d{2}-\d{2})\s*$", text, re.M)
+        slug = re.search(r"^slug:\s*([^\s]+)\s*$", text, re.M)
+        if date and slug:
+            pages.append(ROOT / "blog" / date.group(1).replace("-", "/") / slug.group(1) / "index.html")
+    return pages
+
+
 LIFE_PAGES = [
     ROOT / "blog" / "index.html",
     ROOT / "blog" / "archives" / "index.html",
-    ROOT / "blog" / "2026" / "08" / "31" / "seeing-craft-in-ceramics" / "index.html",
-    ROOT / "blog" / "2026" / "09" / "03" / "pause-by-the-lake" / "index.html",
-    ROOT / "blog" / "2026" / "09" / "05" / "why-i-write-life-notes" / "index.html",
-]
+] + life_article_pages()
 
 
 class PageParser(HTMLParser):
@@ -82,8 +92,8 @@ def main() -> int:
                 )
 
     cnblogs = sorted((ROOT / "cnblogs-drafts").glob("[0-9][0-9]-*.md"))
-    if len(cnblogs) != 3:
-        fail(f"expected 3 cnblogs drafts, found {len(cnblogs)}", failures)
+    if len(cnblogs) != 6:
+        fail(f"expected 6 cnblogs drafts, found {len(cnblogs)}", failures)
     for draft in cnblogs:
         text = draft.read_text(encoding="utf-8")
         if len(re.sub(r"\s+", "", text)) < 1800:
